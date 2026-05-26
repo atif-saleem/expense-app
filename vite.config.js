@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: '/khata/',
   plugins: [
     react(),
     VitePWA({
@@ -17,17 +16,17 @@ export default defineConfig({
         background_color: '#f8fafc',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/khata/',
-        scope: '/khata/',
+        start_url: '/',
+        scope: '/',
         icons: [
           {
-            src: '/khata/pwa-192x192.svg',
+            src: '/pwa-192x192.svg',
             sizes: '192x192',
             type: 'image/svg+xml',
             purpose: 'any maskable'
           },
           {
-            src: '/khata/pwa-512x512.svg',
+            src: '/pwa-512x512.svg',
             sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'any maskable'
