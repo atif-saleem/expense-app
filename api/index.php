@@ -8,6 +8,9 @@ $method = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = '/' . trim((string) $path, '/');
 $parts = array_values(array_filter(explode('/', trim($path, '/'))));
+if (($parts[0] ?? '') === 'api') {
+    array_shift($parts);
+}
 
 try {
     if ($parts === ['auth', 'me'] && $method === 'GET') {
@@ -62,7 +65,14 @@ try {
         $_SESSION = [];
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'] ?? '', (bool) $params['secure'], (bool) $params['httponly']);
+            setcookie(session_name(), '', [
+                'expires' => time() - 42000,
+                'path' => $params['path'],
+                'domain' => $params['domain'] ?? '',
+                'secure' => (bool) $params['secure'],
+                'httponly' => (bool) $params['httponly'],
+                'samesite' => $params['samesite'] ?? 'Lax',
+            ]);
         }
         session_destroy();
         send_json(['ok' => true]);

@@ -2,22 +2,6 @@
 
 declare(strict_types=1);
 
-session_name('khata_session');
-session_set_cookie_params([
-    'lifetime' => 60 * 60 * 24 * 30,
-    'path' => '/',
-    'httponly' => true,
-    'samesite' => 'Lax',
-]);
-session_start();
-
-header('Content-Type: application/json');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
-    exit;
-}
-
 function config(): array
 {
     static $config = null;
@@ -28,6 +12,34 @@ function config(): array
     $path = __DIR__ . '/config.php';
     $config = file_exists($path) ? require $path : require __DIR__ . '/config.example.php';
     return $config;
+}
+
+$config = config();
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowedOrigins = $config['allowed_origins'] ?? [];
+if ($origin !== '' && in_array($origin, $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Headers: Content-Type');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Vary: Origin');
+}
+
+session_name('khata_session');
+session_set_cookie_params([
+    'lifetime' => 60 * 60 * 24 * 30,
+    'path' => '/',
+    'secure' => (bool) ($config['cookie_secure'] ?? false),
+    'httponly' => true,
+    'samesite' => (string) ($config['cookie_samesite'] ?? 'Lax'),
+]);
+session_start();
+
+header('Content-Type: application/json');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
 }
 
 function db(): PDO
