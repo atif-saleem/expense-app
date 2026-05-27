@@ -2,16 +2,22 @@ import { PAGE_SIZE, TIMEZONE } from '../constants/app';
 import { toTransactionDateParts } from '../utils/date';
 import { supabase } from './supabaseClient';
 
-export const buildTransactionPayload = (userId, values, transactionId) => ({
-  ...(transactionId ? { id: transactionId } : {}),
-  type: values.type,
-  title: values.title.trim(),
-  amount: Number(values.amount),
-  note: values.note?.trim() ?? '',
-  ...toTransactionDateParts(values.date),
-  timezone: TIMEZONE,
-  user_id: userId
-});
+export const buildTransactionPayload = (userId, values, transactionId) => {
+  const dateParts = toTransactionDateParts(values.date);
+
+  return {
+    ...(transactionId ? { id: transactionId } : {}),
+    type: values.type,
+    title: values.title.trim(),
+    amount: Number(values.amount),
+    note: values.note?.trim() ?? '',
+    entry_date: dateParts.date,
+    entry_month: dateParts.month,
+    entry_year: dateParts.year,
+    timezone: TIMEZONE,
+    user_id: userId
+  };
+};
 
 const toTransaction = (row) => ({
   id: row.id,
