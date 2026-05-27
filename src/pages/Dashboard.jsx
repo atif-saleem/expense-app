@@ -12,6 +12,8 @@ import { useTransactionStore } from '../store/transactionStore';
 import { currentMonth, today } from '../utils/date';
 import { summarizeTransactions } from '../utils/transactions';
 import { formatCurrency } from '../utils/currency';
+import { getFriendlyApiError } from '../utils/apiErrors';
+import toast from 'react-hot-toast';
 
 export default function Dashboard() {
   const user = useAuthStore((state) => state.user);
@@ -35,6 +37,17 @@ export default function Dashboard() {
   const todaySummary = useMemo(() => summarizeTransactions(transactions.filter((item) => item.date === today())), [transactions]);
   const monthSummary = useMemo(() => summarizeTransactions(transactions.filter((item) => item.month === currentMonth())), [transactions]);
   const recent = transactions.slice(0, 5);
+
+  const submitDelete = async (item) => {
+    if (!window.confirm(`Delete "${item.title}"?`)) return;
+
+    try {
+      await deleteTransaction(user.uid, item.id);
+      refresh(user.uid);
+    } catch (error) {
+      toast.error(getFriendlyApiError(error));
+    }
+  };
 
   return (
     <section className="page-shell space-y-5">
@@ -76,7 +89,7 @@ export default function Dashboard() {
                 key={transaction.id}
                 transaction={transaction}
                 onEdit={() => {}}
-                onDelete={(item) => deleteTransaction(user.uid, item.id)}
+                onDelete={submitDelete}
               />
             ))
           ) : (

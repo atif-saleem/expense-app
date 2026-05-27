@@ -57,6 +57,17 @@ export default function Transactions() {
     }
   };
 
+  const submitDelete = async (item) => {
+    if (!window.confirm(`Delete "${item.title}"?`)) return;
+
+    try {
+      await deleteTransaction(user.uid, item.id);
+      fetchPage(user.uid, true);
+    } catch (error) {
+      toast.error(getFriendlyApiError(error));
+    }
+  };
+
   return (
     <section className="page-shell space-y-4">
       <div>
@@ -99,7 +110,7 @@ export default function Transactions() {
               key={transaction.id}
               transaction={transaction}
               onEdit={setEditing}
-              onDelete={(item) => deleteTransaction(user.uid, item.id)}
+              onDelete={submitDelete}
             />
           ))
         ) : (
