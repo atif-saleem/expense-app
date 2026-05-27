@@ -10,13 +10,18 @@ export class ApiError extends Error {
 const API_BASE_URL = 'https://adilsaleemgs.free.nf/api';
 
 export const apiFetch = async (path, options = {}) => {
+  const headers = {
+    ...(options.headers ?? {})
+  };
+
+  if (options.body) {
+    headers['Content-Type'] = 'text/plain';
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers ?? {})
-    },
-    ...options
+    ...options,
+    headers
   });
 
   const payload = await response.json().catch(() => null);
