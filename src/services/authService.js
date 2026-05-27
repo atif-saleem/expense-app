@@ -1,30 +1,58 @@
-import { apiFetch } from './apiClient';
+import { supabase } from './supabaseClient';
 
-export const observeAuth = (callback) => {
-  let active = true;
-  apiFetch('/auth/me')
-    .then(({ user }) => {
-      if (active) callback(user);
-    })
-    .catch(() => {
-      if (active) callback(null);
-    });
+const toPublicUser = (user) => {
+  if (!user) return null;
 
-  return () => {
-    active = false;
+  return {
+    uid: user.id,
+    id: user.id,
+    displayName: user.user_metadata?.display_name ?? user.user_metadata?.name ?? user.email,
+    email: user.email
   };
 };
 
-export const login = ({ email, password }) => apiFetch('/auth/login', {
-  method: 'POST',
-  body: JSON.stringify({ email, password })
-});
+export const observeAuth = (callback) => {
+  supabase.auth.getUser().then(({ data }) => {
+    callback(toPublicUser(data.user));
+  });
 
-export const signup = ({ name, email, password }) => apiFetch('/auth/signup', {
-  method: 'POST',
-  body: JSON.stringify({ name, email, password })
-});
+  const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+    callback(toPublicUser(session?.user ?? null));
+  });
 
-export const forgotPassword = () => Promise.reject(new Error('Password reset email is not configured for the PHP backend yet.'));
+  return () => {
+    data.subscription.unsubscribe();
+  };
+};
 
-export const logout = () => apiFetch('/auth/logout', { method: 'POST' });
+export const login = async ({ email, password }) => {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return { user: toPublicUser(data.user) };
+};
+
+export const signup = async ({ name, email, password }) => {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        display_name: name
+      }
+    }
+  });
+  if (error) throw error;
+  return { user: toPublicUser(data.user) };
+};
+
+export const forgotPassword = async (email) => {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  });
+  if (error) throw error;
+};
+
+export const logout = async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+};
