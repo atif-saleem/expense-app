@@ -24,9 +24,13 @@ export const TransactionCard = memo(({ transaction, onEdit, onDelete }) => {
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
           <p className={cn('text-sm font-black', transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600')}>{signedAmount}</p>
-          <div className="flex gap-1">
-            <Button aria-label="Edit transaction" variant="ghost" className="h-9 w-9 px-0" icon={Edit3} onClick={() => onEdit(transaction)} />
-            <Button aria-label="Delete transaction" variant="ghost" className="h-9 w-9 px-0 text-rose-500" icon={Trash2} onClick={() => onDelete(transaction)} />
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button aria-label="Edit transaction" variant="secondary" className="min-h-9 px-3 text-xs" icon={Edit3} onClick={() => onEdit(transaction)}>
+              Edit
+            </Button>
+            <Button aria-label="Delete transaction" variant="danger" className="min-h-9 px-3 text-xs" icon={Trash2} onClick={() => onDelete(transaction)}>
+              Delete
+            </Button>
           </div>
         </div>
       </div>
