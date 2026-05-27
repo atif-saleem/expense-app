@@ -7,7 +7,7 @@ export class ApiError extends Error {
   }
 }
 
-const API_BASE_URL = 'https://adilsaleemgs.free.nf/api';
+const API_BASE_URL = 'https://asgs.iceiy.com/api';
 
 export const apiFetch = async (path, options = {}) => {
   const headers = {
